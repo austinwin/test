@@ -33,9 +33,9 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(to bottom, var(--lighter), #F2F4FF);
+            background: linear-gradient(to bottom, var(--darker), var(--dark));
             min-height: 100vh;
-            color: var(--text);
+            color: var(--light);
             line-height: 1.6;
             padding: 0;
             margin: 0;
@@ -89,7 +89,7 @@
         }
 
         .card {
-            background: white;
+            background: var(--dark);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             padding: 2rem;
@@ -101,14 +101,14 @@
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            color: var(--text);
+            color: var(--light);
         }
 
         h2 {
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 1rem;
-            color: var(--text);
+            color: var(--light);
         }
 
         .subtitle {
@@ -125,20 +125,21 @@
             display: block;
             margin-bottom: 0.75rem;
             font-weight: 600;
-            color: var(--text);
+            color: var(--light);
         }
 
         textarea {
             width: 100%;
             height: 150px;
             padding: 1rem;
-            border: 2px solid var(--light);
+            border: 1px solid rgba(223, 227, 250, 0.12);
             border-radius: var(--border-radius);
             resize: vertical;
             font-family: inherit;
             font-size: 1rem;
             transition: var(--transition);
-            color: var(--text);
+            color: var(--light);
+            background: var(--secondary);
         }
 
         textarea:focus {
@@ -192,6 +193,7 @@
         .button-container {
             display: flex;
             gap: 1rem;
+            flex-wrap: wrap;
             margin-top: 1.5rem;
         }
 
@@ -225,12 +227,12 @@
         }
 
         .button-secondary {
-            background: var(--lighter);
-            color: var(--text);
+            background: var(--secondary);
+            color: var(--light);
         }
 
         .button-secondary:hover {
-            background: var(--light);
+            background: #2a2e4b;
         }
 
         .button:disabled {
@@ -254,7 +256,7 @@
 
         .audio-container {
             display: none;
-            background: var(--lighter);
+            background: var(--secondary);
             border-radius: var(--border-radius);
             padding: 1.5rem;
             margin-top: 2rem;
@@ -275,12 +277,44 @@
             border-radius: var(--border-radius);
         }
 
-        .audio-controls {
+        .audio-actions {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            justify-content: flex-end;
             margin-top: 1rem;
         }
+
+        /* Tools */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .tool-card {
+            background: var(--secondary);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+        }
+        .chip {
+            display: inline-block;
+            background: #2a2e4b;
+            color: var(--light);
+            padding: 0.4rem 0.7rem;
+            border-radius: 999px;
+            margin: 0.25rem 0.35rem 0 0;
+            font-size: 0.85rem;
+        }
+        .chip.buttonlike { cursor: pointer; }
+        .muted { color: var(--text-light); font-size: 0.9rem; }
+        .row { display: flex; gap: .5rem; flex-wrap: wrap; }
+        .row > .button { flex: 1 1 auto; min-width: 140px; }
+        .count { font-size: 0.85rem; color: var(--text-light); margin-top: .5rem; }
+        .list { margin-top: .5rem; }
+        .list li { margin: .35rem 0; }
+        .quiz-question { margin: .75rem 0; font-weight: 600; }
+        .quiz-option { display:block; text-align:left; width:100%; margin:.35rem 0; padding:.6rem .8rem; background:#2a2e4b; color:var(--light); border:none; border-radius:10px; }
+        .quiz-option.correct { outline: 2px solid #33D69F; }
+        .quiz-option.wrong { outline: 2px solid #EC5757; }
 
         .audio-button {
             background: white;
@@ -380,9 +414,6 @@
                 </div>
                 VoiceCanvas
             </div>
-            <button class="theme-toggle">
-                <i class="fas fa-moon"></i>
-            </button>
         </header>
         
         <div class="card">
@@ -392,6 +423,7 @@
             <div class="input-container">
                 <label for="text-input">Enter your text:</label>
                 <textarea id="text-input" placeholder="Type or paste your text here..."></textarea>
+                <div class="count"><span id="char-count">0</span> characters • <span id="word-count">0</span> words</div>
             </div>
             
             <div class="button-container">
@@ -402,11 +434,17 @@
                 <button id="clear-button" class="button button-secondary">
                     Clear Text
                 </button>
+                <button id="copy-button" class="button button-secondary">
+                    <i class="fas fa-copy"></i> Copy Text
+                </button>
+                <button id="define-button" class="button button-secondary">
+                    <i class="fas fa-book"></i> Define Selected
+                </button>
             </div>
             
             <div id="status" class="status"></div>
         </div>
-        
+
         <div id="audio-container" class="audio-container">
             <div class="audio-title">
                 <i class="fas fa-headphones"></i>
@@ -414,17 +452,53 @@
             </div>
             
             <audio id="audio-player" controls></audio>
-            
-            <div class="audio-controls">
-                <button class="audio-button" id="play-pause-btn">
-                    <i class="fas fa-play"></i>
+            <div class="audio-actions">
+                <button class="button button-secondary" id="download-btn">
+                    <i class="fas fa-download"></i> Download Audio
                 </button>
-                <div class="audio-progress">
-                    <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Learning Tools</h2>
+            <div class="tools-grid">
+                <div class="tool-card" id="definitions-card">
+                    <div class="row">
+                        <button id="scan-words" class="button button-secondary">
+                            <i class="fas fa-wand-magic-sparkles"></i> Make Words Clickable
+                        </button>
+                        <button id="clear-words" class="button button-secondary">
+                            <i class="fas fa-eraser"></i> Clear Highlights
+                        </button>
+                    </div>
+                    <div class="muted" style="margin-top:.5rem">Tap a word below or select in the box and press Define.</div>
+                    <div id="clickable-text" style="margin-top:.75rem"></div>
+                    <div id="definition-output" class="list"></div>
                 </div>
-                <button class="audio-button" id="download-btn">
-                    <i class="fas fa-download"></i>
-                </button>
+                <div class="tool-card" id="quiz-card">
+                    <div class="row">
+                        <button id="generate-quiz" class="button button-secondary">
+                            <i class="fas fa-clipboard-question"></i> Generate Quiz
+                        </button>
+                        <button id="reset-quiz" class="button button-secondary">
+                            <i class="fas fa-rotate"></i> Reset Quiz
+                        </button>
+                    </div>
+                    <div id="quiz-container" style="margin-top:.75rem"></div>
+                </div>
+                <div class="tool-card" id="pronounce-card">
+                    <div class="muted">Practice pronunciation: pick a sentence and speak.</div>
+                    <div id="sentence-chips" style="margin-top:.5rem"></div>
+                    <div class="row" style="margin-top:.75rem">
+                        <button id="start-mic" class="button button-secondary"><i class="fas fa-microphone"></i> Start</button>
+                        <button id="stop-mic" class="button button-secondary"><i class="fas fa-microphone-slash"></i> Stop</button>
+                    </div>
+                    <div id="stt-output" class="list"></div>
+                </div>
+                <div class="tool-card" id="history-card">
+                    <div class="muted">Recent texts</div>
+                    <ul id="history-list" class="list"></ul>
+                </div>
             </div>
         </div>
         
@@ -444,46 +518,59 @@
             const audioContainer = document.getElementById('audio-container');
             const audioPlayer = document.getElementById('audio-player');
             const statusDiv = document.getElementById('status');
-            const optionCards = document.querySelectorAll('.option-card');
-            const playPauseBtn = document.getElementById('play-pause-btn');
+            const copyButton = document.getElementById('copy-button');
             const downloadBtn = document.getElementById('download-btn');
-            const progressBar = document.getElementById('progress-bar');
-            const themeToggle = document.querySelector('.theme-toggle');
+            const defineButton = document.getElementById('define-button');
+            const charCount = document.getElementById('char-count');
+            const wordCount = document.getElementById('word-count');
+            const clickableText = document.getElementById('clickable-text');
+            const definitionOutput = document.getElementById('definition-output');
+            const scanWordsBtn = document.getElementById('scan-words');
+            const clearWordsBtn = document.getElementById('clear-words');
+            const generateQuizBtn = document.getElementById('generate-quiz');
+            const resetQuizBtn = document.getElementById('reset-quiz');
+            const quizContainer = document.getElementById('quiz-container');
+            const sentenceChips = document.getElementById('sentence-chips');
+            const startMicBtn = document.getElementById('start-mic');
+            const stopMicBtn = document.getElementById('stop-mic');
+            const sttOutput = document.getElementById('stt-output');
             
             // Variables
-            let selectedVoice = 'af_sky';
+            const selectedVoice = 'af_sky';
             let audioUrl = '';
+            let currentSentence = '';
+            let recognition = null;
             
-            // Voice option selection
-            optionCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // Remove active class from all cards
-                    optionCards.forEach(c => c.classList.remove('active'));
-                    // Add active class to clicked card
-                    this.classList.add('active');
-                    // Update selected voice
-                    selectedVoice = this.dataset.voice;
-                });
-            });
+            // Counters
+            function updateCounts() {
+                const txt = textInput.value;
+                charCount.textContent = txt.length;
+                const words = txt.trim().split(/\s+/).filter(Boolean);
+                wordCount.textContent = words.length;
+                renderSentenceChips();
+                saveHistory(txt);
+            }
+            textInput.addEventListener('input', updateCounts);
+            updateCounts();
             
             // Clear text button
             clearButton.addEventListener('click', function() {
                 textInput.value = '';
                 audioContainer.style.display = 'none';
                 setStatus('');
+                updateCounts();
             });
-            
-            // Play/Pause button
-            playPauseBtn.addEventListener('click', function() {
-                if (audioPlayer.paused) {
-                    audioPlayer.play();
-                    this.innerHTML = '<i class="fas fa-pause"></i>';
-                } else {
-                    audioPlayer.pause();
-                    this.innerHTML = '<i class="fas fa-play"></i>';
+
+            // Copy text
+            copyButton.addEventListener('click', async function() {
+                try {
+                    await navigator.clipboard.writeText(textInput.value);
+                    setStatus('Text copied to clipboard.', 'success');
+                } catch (e) {
+                    setStatus('Unable to copy text.', 'error');
                 }
             });
-            
+
             // Download button
             downloadBtn.addEventListener('click', function() {
                 if (audioUrl) {
@@ -496,38 +583,89 @@
                 }
             });
             
-            // Audio player progress
-            audioPlayer.addEventListener('timeupdate', function() {
-                const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-                progressBar.style.width = percentage + '%';
+            // Define selected word (uses dictionaryapi.dev)
+            defineButton.addEventListener('click', function() {
+                const selected = getSelectedText() || guessWordUnderCursor();
+                if (!selected) {
+                    setStatus('Select a word to define.', 'error');
+                    return;
+                }
+                lookupWord(selected);
             });
-            
-            audioPlayer.addEventListener('play', function() {
-                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+
+            // Make words clickable in a preview area
+            scanWordsBtn.addEventListener('click', function() {
+                const html = textToClickable(textInput.value);
+                clickableText.innerHTML = html;
             });
-            
-            audioPlayer.addEventListener('pause', function() {
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            clearWordsBtn.addEventListener('click', function() {
+                clickableText.innerHTML = '';
             });
-            
-            audioPlayer.addEventListener('ended', function() {
-                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                progressBar.style.width = '0%';
-            });
-            
-            // Theme toggle
-            themeToggle.addEventListener('click', function() {
-                document.body.classList.toggle('dark-theme');
-                const icon = this.querySelector('i');
-                if (icon.classList.contains('fa-moon')) {
-                    icon.classList.remove('fa-moon');
-                    icon.classList.add('fa-sun');
-                } else {
-                    icon.classList.remove('fa-sun');
-                    icon.classList.add('fa-moon');
+            clickableText.addEventListener('click', function(e) {
+                const target = e.target;
+                if (target && target.dataset && target.dataset.word) {
+                    lookupWord(target.dataset.word);
                 }
             });
-            
+
+            // Quiz generator
+            generateQuizBtn.addEventListener('click', async function() {
+                const words = pickQuizWords(textInput.value, 4);
+                if (words.length < 2) {
+                    setStatus('Not enough unique words to build a quiz.', 'error');
+                    return;
+                }
+                const defs = await fetchDefinitions(words);
+                renderQuiz(defs);
+            });
+            resetQuizBtn.addEventListener('click', function() {
+                quizContainer.innerHTML = '';
+            });
+
+            // Pronunciation practice (Web Speech API)
+            function setupRecognition() {
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SR) return null;
+                const rec = new SR();
+                rec.lang = 'en-US';
+                rec.interimResults = false;
+                rec.maxAlternatives = 1;
+                return rec;
+            }
+            recognition = setupRecognition();
+            startMicBtn.addEventListener('click', function() {
+                if (!recognition) {
+                    setStatus('Speech recognition not supported on this device.', 'error');
+                    return;
+                }
+                sttOutput.innerHTML = '<div class="muted">Listening… speak now.</div>';
+                recognition.start();
+            });
+            stopMicBtn.addEventListener('click', function() {
+                if (recognition) recognition.stop();
+            });
+            if (recognition) {
+                recognition.addEventListener('result', (e) => {
+                    const said = e.results[0][0].transcript;
+                    const score = similarityScore(normalizeText(currentSentence), normalizeText(said));
+                    sttOutput.innerHTML = `<div><strong>You said:</strong> ${escapeHtml(said)}</div>` +
+                        `<div>Match score: <strong>${Math.round(score * 100)}%</strong></div>`;
+                });
+                recognition.addEventListener('error', () => setStatus('Mic error or permission denied.', 'error'));
+                recognition.addEventListener('end', () => {});
+            }
+            function renderSentenceChips() {
+                const sentences = splitSentences(textInput.value).slice(0, 12);
+                sentenceChips.innerHTML = sentences.map(s => `<span class="chip buttonlike" data-sent="${escapeAttr(s)}">${escapeHtml(trimForChip(s))}</span>`).join('');
+            }
+            sentenceChips.addEventListener('click', (e) => {
+                const t = e.target;
+                if (t && t.dataset && t.dataset.sent) {
+                    currentSentence = t.dataset.sent;
+                    setStatus('Selected sentence for practice.', 'info');
+                }
+            });
+
             // Main generate button
             playButton.addEventListener('click', async function() {
                 const text = textInput.value.trim();
@@ -545,6 +683,7 @@
                 setStatus('Converting your text to speech...', 'info');
                 
                 try {
+                    // Use your TTS API
                     const response = await fetch('https://lifebite.vercel.app/api/speech', {
                         method: 'POST',
                         headers: {
@@ -599,6 +738,121 @@
                     statusDiv.classList.add(type);
                 }
             }
+
+            // Helpers
+            function getSelectedText() {
+                return window.getSelection().toString().trim();
+            }
+            function guessWordUnderCursor() { return ''; }
+            function textToClickable(txt) {
+                return txt.replace(/\b([A-Za-z']+)\b/g, (m, w) => `<span class="chip buttonlike" data-word="${escapeAttr(w)}">${escapeHtml(w)}</span>`);
+            }
+            async function lookupWord(word) {
+                setStatus(`Looking up "${word}"…`, 'info');
+                try {
+                    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+                    if (!res.ok) throw new Error('No definition found');
+                    const data = await res.json();
+                    const entry = data[0];
+                    const phon = (entry.phonetics && entry.phonetics.find(p=>p.text))?.text || '';
+                    const defs = (entry.meanings?.flatMap(m => m.definitions?.map(d => d.definition))||[]).slice(0,3);
+                    definitionOutput.innerHTML = `<div><strong>${escapeHtml(word)}</strong> ${escapeHtml(phon)}</div>` +
+                        '<ul>' + defs.map(d=>`<li>${escapeHtml(d)}</li>`).join('') + '</ul>';
+                    setStatus('Definition loaded.', 'success');
+                } catch (e) {
+                    definitionOutput.innerHTML = '';
+                    setStatus('Could not fetch definition.', 'error');
+                }
+            }
+            function pickQuizWords(text, n) {
+                const words = Array.from(new Set(text.toLowerCase().match(/[a-z']+/g) || []))
+                    .filter(w => w.length > 3 && !STOPWORDS.has(w)).slice(0, 40);
+                shuffle(words);
+                return words.slice(0, n);
+            }
+            const STOPWORDS = new Set([
+                'the','be','to','of','and','a','in','that','have','i','it','for','not','on','with','he','as','you','do','at','this','but','his','by','from','they','we','say','her','she','or','an','will','my','one','all','would','there','their','what','so','up','out','if','about','who','get','which','go','me','when','make','can','like','time','no','just','him','know','take','people','into','year','your','good','some','could','them','see','other','than','then','now','look','only','come','its','over','think','also','back','after','use','two','how','our','work','first','well','way','even','new','want','because','any','these','give','day','most','us'
+            ]);
+            async function fetchDefinitions(words) {
+                const out = [];
+                for (const w of words) {
+                    try {
+                        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w)}`);
+                        if (!res.ok) continue;
+                        const data = await res.json();
+                        const defs = (data[0]?.meanings?.flatMap(m => m.definitions?.map(d => d.definition))||[]).filter(Boolean);
+                        if (defs.length) out.push({ word: w, defs: defs.slice(0,3) });
+                    } catch {}
+                }
+                return out;
+            }
+            function renderQuiz(items) {
+                if (!items.length) { quizContainer.innerHTML = '<div class="muted">No quiz available.</div>'; return; }
+                const questions = items.map((it, idx) => {
+                    const correct = it.defs[0];
+                    const distractors = items.filter((_,i)=>i!==idx).flatMap(x=>x.defs.slice(0,1));
+                    shuffle(distractors);
+                    const options = shuffle([correct, ...distractors.slice(0,3)]);
+                    return { word: it.word, correct, options };
+                });
+                quizContainer.innerHTML = questions.map((q,i)=>
+                    `<div class="quiz-block">
+                        <div class="quiz-question">Q${i+1}. ${escapeHtml(q.word)}</div>
+                        ${q.options.map(opt=>`<button class="quiz-option" data-q="${i}" data-correct="${escapeAttr(q.correct)}" data-opt="${escapeAttr(opt)}">${escapeHtml(opt)}</button>`).join('')}
+                    </div>`
+                ).join('');
+            }
+            quizContainer.addEventListener('click', (e)=>{
+                const t = e.target;
+                if (!(t instanceof Element)) return;
+                if (t.classList.contains('quiz-option')) {
+                    const isCorrect = t.dataset.opt === t.dataset.correct;
+                    t.classList.add(isCorrect ? 'correct' : 'wrong');
+                }
+            });
+            function splitSentences(txt) {
+                return (txt.match(/[^.!?]+[.!?]?/g) || []).map(s => s.trim()).filter(Boolean);
+            }
+            function trimForChip(s) {
+                return s.length > 60 ? s.slice(0,57) + '…' : s;
+            }
+            function normalizeText(s){ return s.toLowerCase().replace(/[^a-z\s']/g,'').replace(/\s+/g,' ').trim(); }
+            function similarityScore(a,b){
+                const wa = a.split(' '), wb = b.split(' ');
+                if (!wa.length || !wb.length) return 0;
+                const setB = new Set(wb);
+                const match = wa.filter(x=>setB.has(x)).length;
+                return match / Math.max(wa.length, wb.length);
+            }
+            function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+            function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
+            function shuffle(arr){ for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+            function saveHistory(txt){
+                try {
+                    const key = 'vc_history_v1';
+                    const items = JSON.parse(localStorage.getItem(key) || '[]');
+                    const norm = txt.trim();
+                    if (!norm) return;
+                    const next = [norm, ...items.filter(x=>x!==norm)].slice(0,5);
+                    localStorage.setItem(key, JSON.stringify(next));
+                    renderHistory(next);
+                } catch {}
+            }
+            function renderHistory(items){
+                const key = 'vc_history_v1';
+                if (!items) items = JSON.parse(localStorage.getItem(key) || '[]');
+                historyList.innerHTML = items.map(t=>`<li><a href="#" data-text="${escapeAttr(t)}">${escapeHtml(trimForChip(t))}</a></li>`).join('');
+            }
+            const historyList = document.getElementById('history-list');
+            historyList.addEventListener('click', (e)=>{
+                const t = e.target;
+                if (t && t.dataset && t.dataset.text){
+                    e.preventDefault();
+                    textInput.value = t.dataset.text;
+                    updateCounts();
+                }
+            });
+            renderHistory();
         });
     </script>
 </body>
