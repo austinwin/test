@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Kokoro TTS Test</title>
+</head>
+<body>
+  <h1>Kokoro TTS (Localhost)</h1>
+
+  <textarea id="text" rows="3" cols="60">Hello from Kokoro!</textarea><br/>
+  <button onclick="speak()">Speak</button>
+
+  <audio id="player" controls style="margin-top:16px; display:block;"></audio>
+
+  <script>
+    async function speak() {
+      const text = document.getElementById("text").value;
+      const response = await fetch("http://localhost:8880/v1/audio/speech", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "kokoro",
+          voice: "af_sky",
+          input: text,
+          format: "mp3"
+        })
+      });
+
+      if (!response.ok) {
+        alert("Error: " + response.status);
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const player = document.getElementById("player");
+      player.src = url;
+      player.play();
+    }
+  </script>
+</body>
+</html>
